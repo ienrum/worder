@@ -9,6 +9,7 @@ using System.Reflection;
 using UnityEditor.Search;
 using UnityEngine.UI;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class GameManager : MonoBehaviour
 {
@@ -18,6 +19,10 @@ public class GameManager : MonoBehaviour
     public List<Transform> boxUiList;
     public Transform hintUI;
     private PlayerManager playerManager;
+
+    public SceneChangeManager sceneChangeManager;
+
+    float timer = 0.0f;
     // Start is called before the first frame update
     void Start()
     {
@@ -37,6 +42,15 @@ public class GameManager : MonoBehaviour
     {
         updateBoxUIList(playerManager.PlayerInput,boxUiList);
         updateHintUI(playerManager.PlayerInput,shuffledWords,hintUI);
+        if (isComplete(playerManager.PlayerInput,wordDictionary))
+        {
+            float score = Mathf.Min(timer, HomeManager.score);
+            PlayerPrefs.SetFloat("Timer", score);
+
+            PlayerPrefs.Save();
+            sceneChangeManager.onGameOver();
+        }
+        timer += Time.deltaTime;
     }
     private void updateBoxUIList(string input,List<Transform> list)
     {
@@ -105,6 +119,18 @@ public class GameManager : MonoBehaviour
             tempColors[i] = target;
         }
         return tempColors;
+    }
+
+    private bool isComplete(string input, List<string> wordDictionary)
+    {
+        foreach(string word in wordDictionary)
+        {
+            if (!input.Contains(word.ToUpper()))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     private string SetCharAt(string str, int index, char c)
