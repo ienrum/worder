@@ -36,7 +36,6 @@ public class PlayerManager : MonoBehaviour
             {
                 playerInput += getKeyToString();
             }
-            
         }
         else if (isKeyOf(getKeyToString(), "Backspace"))
         {
