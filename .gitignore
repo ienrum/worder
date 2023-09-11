@@ -9,6 +9,7 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
+/Logs/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
@@ -83,3 +84,4 @@ $RECYCLE.BIN/
 
 # VS Code directories
 .vscode/
+/Logs/AssetImportWorker0.log
