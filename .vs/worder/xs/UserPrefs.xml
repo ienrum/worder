@@ -1,17 +1,20 @@
 ﻿<Properties StartupConfiguration="{04B8EAC9-CD44-4DAC-CD42-8826DAD88541}|">
-  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="2cf51004-b251-42e6-9970-14101d9d8a1d" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="27601c02-db74-4037-9081-7bd93b9dbc8e" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/GameManager.cs">
     <Files>
-      <File FileName="Assets/Scripts/GameManager.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/GameManager.cs" Line="29" Column="71" />
+      <File FileName="Assets/Scripts/FiveWordList.cs" Line="224" Column="46" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
-          <Node name="worder" expanded="True">
+          <Node name="worder">
             <Node name="Assets" expanded="True">
               <Node name="Scripts" expanded="True">
                 <Node name="GameManager.cs" selected="True" />
@@ -22,6 +25,4 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-  <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
 </Properties>

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -205,6 +206,7 @@ public static class FiveLetterWordsList
     public static List<string> getRandomFiveWordsList(bool isHard = false)
     {
         List<string> targetList;
+        string prevString = "";
         if (isHard)
         {
             targetList = fiveLetterWords;
@@ -217,12 +219,23 @@ public static class FiveLetterWordsList
         List<string> result = new List<string>();
         for (int i = 0; i < 5; i++)
         {
+
             int index = Random.Range(0, n);
+            while (letterOverlapCount(targetList[index], prevString) <= 3)
+            {
+                index = Random.Range(0, n);
+                prevString = targetList[index];
+            }
             result.Add(targetList[index]);
         }
 
         Debug.Log(string.Join(", ", result));
         return result;
 
+    }
+
+    static int letterOverlapCount(string a, string b)
+    {
+        return a.Count(c => b.Contains(c));
     }
 }
