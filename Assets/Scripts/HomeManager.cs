@@ -5,14 +5,12 @@ using UnityEngine;
 
 public class HomeManager : MonoBehaviour
 {
-    public static float score = 10000000000f;
     public TextMeshProUGUI ScoreUI;
     private void Start()
     {
         if (PlayerPrefs.HasKey("Timer"))
         {
-            score = Mathf.Min(PlayerPrefs.GetFloat("Timer"), HomeManager.score);
-            string scoreString = FormatTime(score);
+            string scoreString = FormatTime(PlayerPrefs.GetFloat("Timer"));
             ScoreUI.text = "Score : " + scoreString;
         }
     }
