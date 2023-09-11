@@ -13,7 +13,7 @@ using UnityEngine.SocialPlatforms.Impl;
 
 public class GameManager : MonoBehaviour
 {
-    private List<string> wordDictionary = new List<string>() {"power","coffee","function","bug","man"};
+    private List<string> wordDictionary = new List<string>();
     string shuffledWords = "";
 
     public List<Transform> boxUiList;
@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        wordDictionary = FiveLetterWordsList.getRandomFiveWordsList();
         List<char> chars;
         chars = stringToCharList(String.Join("", wordDictionary));
 
@@ -136,7 +137,7 @@ public class GameManager : MonoBehaviour
     private string SetCharAt(string str, int index, char c)
     {
         if (index < 0 || index >= str.Length)
-            return str; // ÀÎµ¦½º°¡ ¹üÀ§¸¦ ¹þ¾î³ª¸é ¿ø·¡ ¹®ÀÚ¿­ ¹ÝÈ¯
+            return str; // ï¿½Îµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½î³ªï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ú¿ï¿½ ï¿½ï¿½È¯
 
         char[] chars = str.ToCharArray();
         chars[index] = c;
