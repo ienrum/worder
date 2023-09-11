@@ -221,7 +221,7 @@ public static class FiveLetterWordsList
         {
 
             int index = Random.Range(0, n);
-            while (letterOverlapCount(targetList[index], prevString) <= 3)
+            while (letterOverlapCount(targetList[index], prevString) <= 3 && isOverlapWordInList(targetList,prevString))
             {
                 index = Random.Range(0, n);
                 prevString = targetList[index];
@@ -237,5 +237,10 @@ public static class FiveLetterWordsList
     static int letterOverlapCount(string a, string b)
     {
         return a.Count(c => b.Contains(c));
+    }
+
+    static bool isOverlapWordInList(List<string> list, string word)
+    {
+        return list.Contains(word);
     }
 }
