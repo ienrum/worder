@@ -219,9 +219,8 @@ public static class FiveLetterWordsList
         List<string> result = new List<string>();
         for (int i = 0; i < 5; i++)
         {
-
             int index = Random.Range(0, n);
-            while (letterOverlapCount(targetList[index], prevString) <= 3 && isOverlapWordInList(targetList,prevString))
+            while (letterOverlapCount(targetList[index], prevString) <= 3 || isOverlapWordInList(result,prevString))
             {
                 index = Random.Range(0, n);
                 prevString = targetList[index];
