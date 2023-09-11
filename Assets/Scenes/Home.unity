@@ -421,12 +421,15 @@ MonoBehaviour:
       m_Calls: []
   m_text: '1. Guess words from mixed letters.
 
-    2. Correct letters turn red.
+    2. Each words''s length is five.
 
     3.
-    Correct words turn green.
+    Correct letters turn red.
 
-    4. Guess all quickly to win!'
+    4. Correct words turn green.
+
+    5. Guess all
+    quickly to win!'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: e73a58f6e2794ae7b1b7e50b7fb811b0, type: 2}

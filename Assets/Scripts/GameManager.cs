@@ -13,7 +13,7 @@ using UnityEngine.SocialPlatforms.Impl;
 
 public class GameManager : MonoBehaviour
 {
-    private List<string> wordDictionary = new List<string>() {"power","coffee","function","bug","man"};
+    private List<string> wordDictionary = new List<string>();
     string shuffledWords = "";
 
     public List<Transform> boxUiList;
@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        wordDictionary = FiveLetterWordsList.getRandomFiveWordsList();
         List<char> chars;
         chars = stringToCharList(String.Join("", wordDictionary));
 
@@ -94,21 +95,46 @@ public class GameManager : MonoBehaviour
     private List<Color> updateBoxColor(string input, List<string> wordDictionary)
     {
         string tempInput = input;
+        Color yellow;
+        string sharpstring = "#ffcc70" ;
+        ColorUtility.TryParseHtmlString(sharpstring, out yellow);
         List<Color> tempColorList = Enumerable.Repeat(Color.white,25).ToList();
-        int cnt = 0;
         foreach (string word in wordDictionary)
         {
-            int index = tempInput.IndexOf(word.ToUpper());
-            if(index != -1)
+            List<int> indexies = GetAllIndicesOf(tempInput, word[0].ToString().ToUpper());
+            foreach(int idx in indexies)
             {
-                cnt += 1;
-                Color color;
-                ColorUtility.TryParseHtmlString("#96c291", out color);
-                tempColorList = changeToTargetColor(tempColorList, color, index, word.Length+index);
-                
+                if (idx != -1 && (tempColorList[idx] == Color.white || tempColorList[idx] == yellow))
+                {
+                    int overlapCount = letterOverlapCount(word.ToUpper(), tempInput, idx);
+                    Color color;
+                    string colorString = overlapCount != word.Length ? "#ffcc70" : "#96c291";
+                    ColorUtility.TryParseHtmlString(colorString, out color);
+                    tempColorList = changeToTargetColor(tempColorList, color,idx, overlapCount + idx);
+                }
             }
+
         }
         return tempColorList;
+    }
+
+    private int letterOverlapCount(string word,string input,int startIndex)
+    {
+        int cnt = 0;
+        int n = Mathf.Min(word.Length, input.Length - startIndex);
+        for(int i = 0; i < n; i++)
+        {
+            int idx = i + startIndex;
+            if (input[idx] == word[i])
+            {
+                cnt += 1;
+            }
+            else
+            {
+                return cnt;
+            }
+        }
+        return cnt;
     }
 
     private List<Color> changeToTargetColor (List<Color> colorList,Color target,int from,int to)
@@ -132,11 +158,24 @@ public class GameManager : MonoBehaviour
         }
         return true;
     }
+    public static List<int> GetAllIndicesOf(string source, string target)
+    {
+        List<int> result = new List<int>();
+        int index = 0;
+
+        while ((index = source.IndexOf(target, index)) != -1)
+        {
+            result.Add(index);
+            index += target.Length; // í˜„ì¬ ìœ„ì¹˜ì—ì„œ ëŒ€ìƒ ë¬¸ìì—´ì˜ ê¸¸ì´ë§Œí¼ ì´ë™
+        }
+
+        return result;
+    }
 
     private string SetCharAt(string str, int index, char c)
     {
         if (index < 0 || index >= str.Length)
-            return str; // ÀÎµ¦½º°¡ ¹üÀ§¸¦ ¹ş¾î³ª¸é ¿ø·¡ ¹®ÀÚ¿­ ¹İÈ¯
+            return str; // ï¿½Îµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½î³ªï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ú¿ï¿½ ï¿½ï¿½È¯
 
         char[] chars = str.ToCharArray();
         chars[index] = c;
@@ -147,6 +186,7 @@ public class GameManager : MonoBehaviour
     {
         return "<color=#"+colorCode+">"+ input + "</color>";  
     }
+
 
     private bool isColorString (string input,int index)
     {
