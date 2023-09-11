@@ -45,8 +45,7 @@ public class GameManager : MonoBehaviour
         updateHintUI(playerManager.PlayerInput,shuffledWords,hintUI);
         if (isComplete(playerManager.PlayerInput,wordDictionary))
         {
-            float score = Mathf.Min(timer, HomeManager.score);
-            PlayerPrefs.SetFloat("Timer", score);
+            PlayerPrefs.SetFloat("Timer", timer);
 
             PlayerPrefs.Save();
             sceneChangeManager.onGameOver();
@@ -95,27 +94,44 @@ public class GameManager : MonoBehaviour
     private List<Color> updateBoxColor(string input, List<string> wordDictionary)
     {
         string tempInput = input;
-        Color yellow;
-        string sharpstring = "#ffcc70" ;
-        ColorUtility.TryParseHtmlString(sharpstring, out yellow);
+        Color green;
+        string sharpstring = "#96c291";
+        ColorUtility.TryParseHtmlString(sharpstring, out green);
         List<Color> tempColorList = Enumerable.Repeat(Color.white,25).ToList();
         foreach (string word in wordDictionary)
         {
             List<int> indexies = GetAllIndicesOf(tempInput, word[0].ToString().ToUpper());
             foreach(int idx in indexies)
             {
-                if (idx != -1 && (tempColorList[idx] == Color.white || tempColorList[idx] == yellow))
+                if (idx != -1 && (tempColorList[idx] != green))
                 {
                     int overlapCount = letterOverlapCount(word.ToUpper(), tempInput, idx);
+                    if (overlapCount <= 1) { continue; }
+                    float overlapRatio = overlapCount / word.Length;
                     Color color;
-                    string colorString = overlapCount != word.Length ? "#ffcc70" : "#96c291";
-                    ColorUtility.TryParseHtmlString(colorString, out color);
+                    color = overlapCount != word.Length ? AdjustBrightness("#ffcc70",1.5f+ overlapCount * -0.2f) : AdjustBrightness("#96c291", 1f );
                     tempColorList = changeToTargetColor(tempColorList, color,idx, overlapCount + idx);
                 }
             }
 
         }
         return tempColorList;
+    }
+    public Color AdjustBrightness(string hexColor, float brightnessFactor)
+    {
+        Color color;
+
+        if (ColorUtility.TryParseHtmlString(hexColor, out color))
+        {
+            color.r = Mathf.Clamp01(color.r * brightnessFactor);
+            color.g = Mathf.Clamp01(color.g * 1);
+            color.b = Mathf.Clamp01(color.b * 1);
+            return color;
+        }
+        else
+        {
+            return Color.black;
+        }
     }
 
     private int letterOverlapCount(string word,string input,int startIndex)
