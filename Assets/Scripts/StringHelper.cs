@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class FiveLetterWordsList
+public static class StringHelper
 {
     static List<string> fiveLetterWords = new List<string>
     {
@@ -200,9 +200,13 @@ public static class FiveLetterWordsList
         "cloud",
         "crazy"
     };
+    public static string GetShuffledLetters(List<string> wordDictionary)
+    {
+        string result = "";
+        result = MakeStringListShuffledString(wordDictionary);
 
-
-
+        return result;
+    }
     public static List<string> getRandomFiveWordsList(bool isHard = false)
     {
         List<string> targetList;
@@ -220,17 +224,14 @@ public static class FiveLetterWordsList
         for (int i = 0; i < 5; i++)
         {
             int index = Random.Range(0, n);
-            while (letterOverlapCount(targetList[index], prevString) <= 3 || isOverlapWordInList(result,prevString))
+            while (letterOverlapCount(targetList[index], prevString) <= 3 || isOverlapWordInList(result, prevString))
             {
                 index = Random.Range(0, n);
                 prevString = targetList[index];
             }
             result.Add(targetList[index]);
         }
-
-        Debug.Log(string.Join(", ", result));
-        return result;
-
+        return StringListToUpper(result);
     }
 
     static int letterOverlapCount(string a, string b)
@@ -241,5 +242,82 @@ public static class FiveLetterWordsList
     static bool isOverlapWordInList(List<string> list, string word)
     {
         return list.Contains(word);
+    }
+    public static string charListToString(List<char> chars)
+    {
+        return new string(chars.ToArray());
+    }
+
+    public static List<char> stringToCharList(string word)
+    {
+        List<char> chars = new List<char>();
+        chars.AddRange(word);
+        return chars;
+    }
+    public static string FormatTime(float seconds)
+    {
+        int intSeconds = (int)seconds;
+        int hours = intSeconds / 3600;
+        int minutes = (intSeconds % 3600) / 60;
+        int remainingSeconds = intSeconds % 60;
+
+        return string.Format("{0:D2}:{1:D2}:{2:D2}", hours, minutes, remainingSeconds);
+    }
+    public static List<int> GetAllIndicesOf(string source, string target)
+    {
+        List<int> result = new List<int>();
+        int index = 0;
+
+        while ((index = source.IndexOf(target, index)) != -1)
+        {
+            result.Add(index);
+            index += target.Length;
+        }
+
+        return result;
+    }
+    public static string MakeStringListShuffledString(List<string> wordDictionary)
+    {
+
+        List<char> chars;
+        chars = StringHelper.stringToCharList(string.Join("", wordDictionary));
+
+        List<char> shuffledCharList = ShuffleList(chars, 100);
+        return StringHelper.charListToString(shuffledCharList).ToUpper();
+    }
+    public static List<string> StringListToUpper(List<string> list)
+    {
+        List<string> result = new List<string>(list);
+        for (int i = 0; i < result.Count; i++)
+        {
+            result[i] = result[i].ToUpper();
+        }
+        return result;
+    }
+    public static List<string> StringListToLower(List<string> list)
+    {
+        List<string> result = new List<string>(list);
+        for (int i = 0; i < result.Count; i++)
+        {
+            result[i] = result[i].ToLower();
+        }
+        return result;
+    }
+    private static List<T> ShuffleList<T>(List<T> list, int shuffleCount)
+    {
+        int n = list.Count;
+        List<T> result = list.Select(t => t).ToList();
+        while (shuffleCount > 1)
+        {
+            shuffleCount--;
+
+            int idx = shuffleCount % n;
+            int k = UnityEngine.Random.Range(0, shuffleCount % n);
+
+            T temp = result[idx];
+            result[idx] = result[k];
+            result[k] = temp;
+        }
+        return result;
     }
 }
