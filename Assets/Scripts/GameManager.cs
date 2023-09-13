@@ -10,64 +10,212 @@ using UnityEditor.Search;
 using UnityEngine.UI;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.SocialPlatforms.Impl;
+using System.Threading;
 
 public class GameManager : MonoBehaviour
 {
+    string greenHexString = "";
+    string yellowHexString = "";
+    string redHexString = "";
+    string backHexString = "";
+
     private List<string> wordDictionary = new List<string>();
     string shuffledWords = "";
 
     public List<Transform> boxUiList;
     public Transform hintUI;
-    private PlayerManager playerManager;
+    public Transform ScoreUI;
+    public Transform TitleUI;
 
+    public Camera camera;
+
+    private PlayerManager playerManager;
     public SceneChangeManager sceneChangeManager;
 
     float timer = 0.0f;
     // Start is called before the first frame update
     void Start()
     {
-        wordDictionary = FiveLetterWordsList.getRandomFiveWordsList();
-        List<char> chars;
-        chars = stringToCharList(String.Join("", wordDictionary));
+        List<string> colorHexStrings = ColorHelper.getRandomColorList();
 
-        List<char> shuffledCharList = ShuffleList(chars,100);
-        shuffledWords = charListToString(shuffledCharList).ToUpper();
+        greenHexString = colorHexStrings[0];
+        yellowHexString = colorHexStrings[1];
+        redHexString = colorHexStrings[2];
+        backHexString = colorHexStrings[3];
+
+        camera.GetComponent<Camera>().backgroundColor = ColorHelper.HexToColor(backHexString);
+
+        ScoreUI.GetComponent<TextMeshProUGUI>().text = ColorHelper.toColorString(ScoreUI.GetComponent<TextMeshProUGUI>().text, greenHexString);
+        TitleUI.GetComponent<TextMeshProUGUI>().text = ColorHelper.toColorString(TitleUI.GetComponent<TextMeshProUGUI>().text, greenHexString);
+        hintUI.GetComponent<TextMeshProUGUI>().text = ColorHelper.toColorString(shuffledWords, redHexString);
+
+        wordDictionary = StringHelper.getRandomFiveWordsList();
+        foreach(string word in wordDictionary)
+        {
+            Debug.Log(word);
+        }
+        shuffledWords = StringHelper.GetShuffledLetters(wordDictionary);
 
         playerManager = FindAnyObjectByType<PlayerManager>();
-
-        hintUI.GetComponent<TextMeshProUGUI>().text = shuffledWords;
     }
 
     // Update is called once per frame
     void Update()
     {
-        updateBoxUIList(playerManager.PlayerInput,boxUiList);
-        updateHintUI(playerManager.PlayerInput,shuffledWords,hintUI);
-        if (isComplete(playerManager.PlayerInput,wordDictionary))
+        if (isComplete(playerManager.PlayerInput, wordDictionary))
         {
-            PlayerPrefs.SetFloat("Timer", timer);
-
-            PlayerPrefs.Save();
-            sceneChangeManager.onGameOver();
+            QuitGame(timer);
         }
+        boxUiList = updateBoxUIList(playerManager.PlayerInput, boxUiList);
+        updateHintUI(playerManager.PlayerInput, shuffledWords, hintUI);
         timer += Time.deltaTime;
+        ScoreUI.GetComponent<TextMeshProUGUI>().text = updateScoreText(timer,greenHexString);
     }
-    private void updateBoxUIList(string input,List<Transform> list)
+    private string updateScoreText(float timer, string greenHexString)
     {
-        List<Color> tempColorList = updateBoxColor(input, wordDictionary);
-        int n = list.Count();
-        for(int i=0;i<n;i++)
-        {
-            list[i].GetChild(0).GetComponent<TextMeshProUGUI>().text = i < input.Length ? input[i].ToString() : "";
-            list[i].GetComponent<Image>().color = tempColorList[i];
-        }
+        return ColorHelper.toColorString(StringHelper.FormatTime(timer), greenHexString);
     }
+    private void QuitGame(float timer)
+    {
+        PlayerPrefs.SetFloat("Timer", timer);
+        PlayerPrefs.Save();
 
-    private void updateHintUI(string input,string shuffledWords,Transform hintUI)
+        sceneChangeManager.onGameOver();
+    }
+    private List<Transform> updateBoxUIList(string playerInput,List<Transform> list)
     {
-        string tempWords = updateHintColor(input, shuffledWords);
+        List<Transform> tempList = new List<Transform>(list);
+
+        tempList = updateBoxUIListText(tempList, playerInput);
+
+        List<Color> colorList = makeColorList(playerInput, wordDictionary);
+        tempList = updateBoxUIListColor(tempList, colorList);
+
+        return tempList;
+    }
+    private void updateHintUI(string input, string shuffledWords, Transform hintUI)
+    {
+        string tempWords = updateHintColor(input, ColorHelper.toColorString(shuffledWords, redHexString));
 
         hintUI.GetComponent<TextMeshProUGUI>().text = tempWords;
+    }
+    private bool isComplete(string input, List<string> wordDictionary)
+    {
+        foreach (string word in wordDictionary)
+        {
+            if (!input.Contains(word.ToUpper()))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    private List<Transform> updateBoxUIListText(List<Transform> boxUIListTransform, string playerInput)
+    {
+        List<Transform> tempList = new List<Transform>(boxUIListTransform);
+        tempList = updateListByValue(tempList, playerInput, (tempList, playerInput, i) => tempList[i].GetChild(0).GetComponent<TextMeshProUGUI>().text = i < playerInput.Length ? ColorHelper.toColorString(playerInput[i].ToString(), ColorHelper.ColorToHex(ColorHelper.LerpHexColor(yellowHexString,redHexString,0.5f))) : "");
+        return tempList;
+    }
+    private List<Transform> updateBoxUIListColor(List<Transform> boxUIListTransform, List<Color> colorList)
+    {
+        List<Transform> tempList = new List<Transform>(boxUIListTransform);
+        tempList = updateListByValue(tempList, colorList, (tempList, colorList, i) => tempList[i].GetComponent<Image>().color = colorList[i]);
+        return tempList;
+    }
+    private delegate void UpdateTarget<T, V>(T target, V value);
+    private delegate void UpdateTargetList<T, V>(List<T> target, V value, int index);
+    private List<T> updateListByValue<T, V>(List<T> list, V value, UpdateTargetList<T, V> updateTargetList)
+    {
+        List<T> tempList = new List<T>(list);
+        int n = list.Count();
+        for (int i = 0; i < n; i++)
+        {
+            updateTargetList(tempList, value, i);
+        }
+        return tempList;
+    }
+    private List<Color> makeColorList(string playerInput, List<string> correctWords)
+    {
+        string tempPlayerInput = playerInput;
+        List<Color> colorList = Enumerable.Repeat(ColorHelper.HexToColor(backHexString), 25).ToList();
+        colorList = makeColorListByCorrectWords(correctWords, tempPlayerInput, colorList);
+        return colorList;
+    }
+
+    private List<Color> makeColorListByCorrectWords(List<string> correctWords, string tempPlayerInput, List<Color> colorList)
+    {
+        List<Color> tempColorList = new List<Color>(colorList);
+        foreach (string correctWord in correctWords)
+        {
+            tempColorList = makeColorListByCorrectWord(tempPlayerInput, tempColorList, correctWord);
+        }
+
+        return tempColorList;
+    }
+
+    private List<Color> makeColorListByCorrectWord(string tempPlayerInput, List<Color> colorList, string correctWord)
+    {
+        Color green = ColorHelper.HexToColor(greenHexString);
+        Color yellow = ColorHelper.HexToColor(yellowHexString);
+        Color red = ColorHelper.HexToColor(redHexString);
+
+        List<Color> tempColorList = new List<Color> (colorList);
+        List<int> firstLetterIndicesOfWord = GetCorrectFirstLetterIndicesOfPlayerInput(tempPlayerInput, correctWord);
+
+        foreach (int wordFirstIndex in firstLetterIndicesOfWord)
+        {
+            if (isNotFoundIndex(wordFirstIndex)) { continue; }
+            if (isAbleToChangeColor(tempPlayerInput, tempColorList, correctWord, green, wordFirstIndex))
+            {
+                int overlapLength = letterOverlapLength(correctWord, tempPlayerInput, wordFirstIndex);
+
+                Color color;
+                color = makeColorByOverlapLength(yellowHexString, greenHexString, correctWord, overlapLength);
+                tempColorList = ColorHelper.makeColorListByTargetColor(tempColorList, color, wordFirstIndex, wordFirstIndex + overlapLength);
+            }
+            if (isOverlapPrevWord(tempPlayerInput, correctWord, wordFirstIndex))
+            {
+                tempColorList = ColorHelper.makeColorListByTargetColor(tempColorList, red, wordFirstIndex, wordFirstIndex + correctWord.Length);
+            }
+        }
+
+        return tempColorList;
+    }
+
+    private bool isOverlapPrevWord(string tempPlayerInput, string correctWord, int wordFirstIndex)
+    {
+        if (tempPlayerInput.Length -  wordFirstIndex < correctWord.Length)
+        {
+            return false;
+        }
+        return tempPlayerInput.Substring(wordFirstIndex, correctWord.Length) == correctWord && tempPlayerInput.IndexOf(correctWord) != wordFirstIndex;
+    }
+
+    private List<int> GetCorrectFirstLetterIndicesOfPlayerInput(string playerInput, string correctWord)
+    {
+        string firstLetterOfWord = correctWord[0].ToString();
+        return StringHelper.GetAllIndicesOf(playerInput, firstLetterOfWord);
+    }
+
+
+    private bool isAbleToChangeColor(string tempPlayerInput, List<Color> colorList, string word, Color green, int wordFirstIndex)
+    {
+        return ColorHelper.isDifferentColor(colorList[wordFirstIndex], green) && isStringOverlapCountUpperThan1(word, tempPlayerInput, wordFirstIndex);
+    }
+
+    private bool isNotFoundIndex(int index)
+    {
+        return index == -1;
+    }
+
+    private bool isStringOverlapCountUpperThan1(string word1,string word2,int idx)
+    {
+        return letterOverlapLength(word1,word2,idx) > 1;
+    }
+    private Color makeColorByOverlapLength(string yellowHexString, string greenHexString, string word, int overlapCount)
+    {
+        Color yellowToGreen = ColorHelper.LerpHexColor(yellowHexString, greenHexString, overlapCount / (word.Length + 0.0f));
+        return yellowToGreen;
     }
 
     private string updateHintColor(string input, string shuffledWords)
@@ -77,11 +225,10 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < tempInput.Length; i++)
         {
-            int index = findIndexOfStringByFiltering(tempWords, tempInput[i].ToString(),isColorString);
-
-            if (index != -1 && !isColorString(tempWords, index))
+            int index = findIndexOfStringByFiltering(tempWords, tempInput[i].ToString(), ColorHelper.isColorString);
+            if (index != -1 && !ColorHelper.isColorString(tempWords, index, greenHexString))
             {
-                string colorString = toColorString(tempWords[index].ToString(), "ae445a");
+                string colorString = ColorHelper.toColorString(tempWords[index].ToString(), greenHexString);
 
                 tempWords = tempWords.Remove(index, 1);
                 tempWords = tempWords.Insert(index, colorString);
@@ -91,50 +238,7 @@ public class GameManager : MonoBehaviour
         return tempWords;
     }
 
-    private List<Color> updateBoxColor(string input, List<string> wordDictionary)
-    {
-        string tempInput = input;
-        Color green;
-        string sharpstring = "#96c291";
-        ColorUtility.TryParseHtmlString(sharpstring, out green);
-        List<Color> tempColorList = Enumerable.Repeat(Color.white,25).ToList();
-        foreach (string word in wordDictionary)
-        {
-            List<int> indexies = GetAllIndicesOf(tempInput, word[0].ToString().ToUpper());
-            foreach(int idx in indexies)
-            {
-                if (idx != -1 && (tempColorList[idx] != green))
-                {
-                    int overlapCount = letterOverlapCount(word.ToUpper(), tempInput, idx);
-                    if (overlapCount <= 1) { continue; }
-                    float overlapRatio = overlapCount / word.Length;
-                    Color color;
-                    color = overlapCount != word.Length ? AdjustBrightness("#ffcc70",1.5f+ overlapCount * -0.2f) : AdjustBrightness("#96c291", 1f );
-                    tempColorList = changeToTargetColor(tempColorList, color,idx, overlapCount + idx);
-                }
-            }
-
-        }
-        return tempColorList;
-    }
-    public Color AdjustBrightness(string hexColor, float brightnessFactor)
-    {
-        Color color;
-
-        if (ColorUtility.TryParseHtmlString(hexColor, out color))
-        {
-            color.r = Mathf.Clamp01(color.r * brightnessFactor);
-            color.g = Mathf.Clamp01(color.g * 1);
-            color.b = Mathf.Clamp01(color.b * 1);
-            return color;
-        }
-        else
-        {
-            return Color.black;
-        }
-    }
-
-    private int letterOverlapCount(string word,string input,int startIndex)
+    private int letterOverlapLength(string word,string input,int startIndex)
     {
         int cnt = 0;
         int n = Mathf.Min(word.Length, input.Length - startIndex);
@@ -153,83 +257,17 @@ public class GameManager : MonoBehaviour
         return cnt;
     }
 
-    private List<Color> changeToTargetColor (List<Color> colorList,Color target,int from,int to)
-    {
-        List<Color> tempColors = new List<Color>(colorList);
-        for(int i = from; i < to; i++)
-        {
-            tempColors[i] = target;
-        }
-        return tempColors;
-    }
-
-    private bool isComplete(string input, List<string> wordDictionary)
-    {
-        foreach(string word in wordDictionary)
-        {
-            if (!input.Contains(word.ToUpper()))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-    public static List<int> GetAllIndicesOf(string source, string target)
-    {
-        List<int> result = new List<int>();
-        int index = 0;
-
-        while ((index = source.IndexOf(target, index)) != -1)
-        {
-            result.Add(index);
-            index += target.Length; // 현재 위치에서 대상 문자열의 길이만큼 이동
-        }
-
-        return result;
-    }
-
-    private string SetCharAt(string str, int index, char c)
-    {
-        if (index < 0 || index >= str.Length)
-            return str; // �ε����� ������ ����� ���� ���ڿ� ��ȯ
-
-        char[] chars = str.ToCharArray();
-        chars[index] = c;
-        return new string(chars);
-    }
-
-    private string toColorString( string input,string colorCode)
-    {
-        return "<color=#"+colorCode+">"+ input + "</color>";  
-    }
-
-
-    private bool isColorString (string input,int index)
-    {
-        if (index + 2 >= input.Length)
-        {
-            return false;
-        }
-        if (input.Substring(index+1,2) == "</")
-        {
-            return true;
-        }
-        return false;
-    }
-
-    private delegate bool MyDelegate(string a, int b);
-
-
+    private delegate bool MyDelegate(string a, int b,string baseHex);
     private int findIndexOfStringByFiltering(string text,string searchTerm,MyDelegate filterFunc)
     {
         int index = 0;
         while ((index = text.IndexOf(searchTerm, index)) != -1)
         {
-            if (filterFunc(text, index))
+            if (filterFunc(text, index,greenHexString))
             {
                 index += searchTerm.Length;
             }
-            else if (!filterFunc(text, index))
+            else if (!filterFunc(text, index, greenHexString))
             {
                 return index;
             }
@@ -237,33 +275,5 @@ public class GameManager : MonoBehaviour
 
         return -1;
     }
-
-    private List<T> ShuffleList<T>(List<T> list,int shuffleCount)
-    {
-        int n = list.Count;
-        List<T> result = list.Select(t => t).ToList();
-        while (shuffleCount > 1)
-        {
-            shuffleCount--;
-
-            int idx = shuffleCount % n;
-            int k = UnityEngine.Random.Range(0, shuffleCount %n);
-
-            T temp = result[idx];
-            result[idx] = result[k];
-            result[k] = temp;
-        }
-        return result;
-    }
-    private string charListToString(List<char> chars)
-    {
-        return new string(chars.ToArray());
-    }
-
-    private List<char> stringToCharList(string  word)
-    {
-        List<char> chars = new List<char>();
-        chars.AddRange(word);
-        return chars;
-    }
 }
+
