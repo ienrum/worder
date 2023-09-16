@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -12,37 +13,65 @@ public class RankingManager : MonoBehaviour
     public Transform playerNameUI;
     public Transform scoreField;
     public Transform contentFieldPos;
+    public Transform errorMessageUI;
+    public Transform toHomeButton;
+    public Transform EnterButton;
 
-    Dictionary<string, string> playerScoreDict;
+    Dictionary<string, int> playerScoreDict = new Dictionary<string, int>()
+    {
+        {"player1",10 },
+    };
 
     // Start is called before the first frame update
     void Start()
     {
-        playerScoreDict = PlayerPrefsDictionary.LoadDictionary("playerScores");
+        if (PlayerPrefs.HasKey("playerScores"))
+            playerScoreDict = PlayerPrefsDictionary.LoadDictionary("playerScores");
     }
 
-    public void onClicked()
+    public void showRank()
     {
         string playerName = inputField.GetChild(0).GetChild(2).GetComponent<TextMeshProUGUI>().text;
         string score = scoreField.GetComponent<TextMeshProUGUI>().text;
 
-        playerScoreDict.Add(playerName, score.Substring(8, score.Length - 8));
-        PlayerPrefsDictionary.SaveDictionary(playerScoreDict, "playerScores");
+        if (playerScoreDict.ContainsKey(playerName))
+        {
+            errorMessageUI.GetComponent<TextMeshProUGUI>().text = "Name is duplicated";
+            StartCoroutine(ErrorMessageCoroutine(errorMessageUI));
+        }
+        else
+        {
+            playerScoreDict.Add(playerName, StringHelper.DecodeFormatTime(score.Substring(8, score.Length - 8)));
 
-        inputField.gameObject.SetActive(false);
-        scoreField.gameObject.SetActive(false);
-        scrollView.gameObject.SetActive(true);
+            PlayerPrefsDictionary.SaveDictionary(playerScoreDict, "playerScores");
 
-        playerNameUI.GetComponent<TextMeshProUGUI>().text = playerName;
-        MakeScoreFieldList(playerScoreDict, playerNameUI, contentFieldPos);
+
+            inputField.gameObject.SetActive(false);
+            scoreField.gameObject.SetActive(false);
+            scrollView.gameObject.SetActive(true);
+            EnterButton.gameObject.SetActive(false);
+
+            MakeScoreFieldList(playerScoreDict, playerNameUI, contentFieldPos);
+
+            toHomeButton.gameObject.SetActive(true);
+        }
+    }
+    private IEnumerator ErrorMessageCoroutine(Transform errorMessageUI)
+    {
+        yield return new WaitForSeconds(3); // 3√  ¥Î±‚
+        errorMessageUI.GetComponent<TextMeshProUGUI>().text = "";
     }
 
-    private void MakeScoreFieldList (Dictionary<string,string> playerScoreDict,Transform playerNameUI, Transform contentFieldPos)
+    private void MakeScoreFieldList (Dictionary<string,int> playerScoreDict,Transform playerNameUI, Transform contentFieldPos)
     {
-        foreach(var kvp in playerScoreDict)
+        var sortedDictDesc = playerScoreDict.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+
+        int i = 0;
+        foreach (var kvp in sortedDictDesc)
         {
+            i++;
             Transform tempPlayerNameUI = playerNameUI;
-            tempPlayerNameUI.GetComponent<TextMeshProUGUI>().text = kvp.Key + " : " + kvp.Value;
+            tempPlayerNameUI.GetComponent<TextMeshProUGUI>().text =  "["+i + "]  " + kvp.Key + " : " + StringHelper.FormatTime(kvp.Value);
             Instantiate(tempPlayerNameUI, contentFieldPos);
         }
     }
@@ -52,7 +81,7 @@ public class RankingManager : MonoBehaviour
 
 public class PlayerPrefsDictionary
 {
-    public static void SaveDictionary(Dictionary<string, string> dict, string prefKey)
+    public static void SaveDictionary(Dictionary<string, int> dict, string prefKey)
     {
         StringBuilder sb = new StringBuilder();
         foreach (var kvp in dict)
@@ -62,9 +91,9 @@ public class PlayerPrefsDictionary
         PlayerPrefs.SetString(prefKey, sb.ToString());
     }
 
-    public static Dictionary<string, string> LoadDictionary(string prefKey)
+    public static Dictionary<string, int> LoadDictionary(string prefKey)
     {
-        var result = new Dictionary<string, string>();
+        var result = new Dictionary<string, int>();
         var savedString = PlayerPrefs.GetString(prefKey, "");
         if (!string.IsNullOrEmpty(savedString))
         {
@@ -74,7 +103,7 @@ public class PlayerPrefsDictionary
                 if (parts.Length == 2)
                 {
                     string value = parts[1];
-                    result[parts[0]] = value;
+                    result[parts[0]] = int.Parse(value);
                     
                 }
             }
