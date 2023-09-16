@@ -30,7 +30,6 @@ public class GameManager : MonoBehaviour
     public Camera camera;
 
     private PlayerManager playerManager;
-    public SceneChangeManager sceneChangeManager;
 
     float timer = 0.0f;
     // Start is called before the first frame update
@@ -80,7 +79,7 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.SetFloat("Timer", timer);
         PlayerPrefs.Save();
 
-        sceneChangeManager.onGameOver();
+        SceneChangeManager.goRank();
     }
     private List<Transform> updateBoxUIList(string playerInput,List<Transform> list)
     {
