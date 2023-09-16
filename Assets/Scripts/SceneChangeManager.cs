@@ -7,13 +7,18 @@ using UnityEngine.UI;
 
 public class SceneChangeManager : MonoBehaviour
 {
-    public void onClicked()
+    public static void goPlay()
     {
-        SceneManager.LoadScene("Play",LoadSceneMode.Single);
+        SceneManager.LoadScene("Play", LoadSceneMode.Single);
     }
 
-    public void onGameOver()
+    public static void goHome()
     {
         SceneManager.LoadScene("Home", LoadSceneMode.Single);
+    }
+
+    public static void goRank()
+    {
+        SceneManager.LoadScene("Rank", LoadSceneMode.Single);
     }
 }
