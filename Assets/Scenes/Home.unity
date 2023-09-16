@@ -839,7 +839,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1839800661}
         m_TargetAssemblyTypeName: SceneChangeManager, Assembly-CSharp
-        m_MethodName: onClicked
+        m_MethodName: goPlay
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
