@@ -32,7 +32,7 @@ public class RankingManager : MonoBehaviour
     public void showRank()
     {
         string playerName = inputField.GetChild(0).GetChild(2).GetComponent<TextMeshProUGUI>().text;
-        string score = scoreField.GetComponent<TextMeshProUGUI>().text;
+        string scoreText = scoreField.GetComponent<TextMeshProUGUI>().text;
 
         if (playerScoreDict.ContainsKey(playerName))
         {
@@ -41,24 +41,33 @@ public class RankingManager : MonoBehaviour
         }
         else
         {
-            playerScoreDict.Add(playerName, StringHelper.DecodeFormatTime(score.Substring(8, score.Length - 8)));
+            playerScoreDict.Add(playerName, getScoreFromUI(scoreText));
 
             PlayerPrefsDictionary.SaveDictionary(playerScoreDict, "playerScores");
 
-
-            inputField.gameObject.SetActive(false);
-            scoreField.gameObject.SetActive(false);
-            scrollView.gameObject.SetActive(true);
-            EnterButton.gameObject.SetActive(false);
-
             MakeScoreFieldList(playerScoreDict, playerNameUI, contentFieldPos);
-
-            toHomeButton.gameObject.SetActive(true);
+            updateUIs();
         }
     }
+
+    private void updateUIs()
+    {
+        inputField.gameObject.SetActive(false);
+        scoreField.gameObject.SetActive(false);
+        EnterButton.gameObject.SetActive(false);
+
+        scrollView.gameObject.SetActive(true);
+        toHomeButton.gameObject.SetActive(true);
+    }
+
+    private static int getScoreFromUI(string score)
+    {
+        return StringHelper.DecodeFormatTime(score.Substring(8, score.Length - 8));
+    }
+
     private IEnumerator ErrorMessageCoroutine(Transform errorMessageUI)
     {
-        yield return new WaitForSeconds(3); // 3ÃÊ ´ë±â
+        yield return new WaitForSeconds(3); // 3ï¿½ï¿½ ï¿½ï¿½ï¿½
         errorMessageUI.GetComponent<TextMeshProUGUI>().text = "";
     }
 
