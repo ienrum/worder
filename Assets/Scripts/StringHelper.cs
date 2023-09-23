@@ -261,7 +261,16 @@ public static class StringHelper
         int minutes = (intSeconds % 3600) / 60;
         int remainingSeconds = intSeconds % 60;
 
-        return string.Format("{0:D2}:{1:D2}:{2:D2}", hours, minutes, remainingSeconds);
+        return string.Format("{0:D2}.{1:D2}.{2:D2}", hours, minutes, remainingSeconds);
+    }
+    public static int DecodeFormatTime (string formatedTime)
+    {
+        int firstIndex = formatedTime.IndexOf(".");
+        int seconds = int.Parse(formatedTime.Substring(0, firstIndex)) * 3600;
+        seconds += int.Parse(formatedTime.Substring(++firstIndex, 2)) * 60;
+        seconds += int.Parse(formatedTime.Substring(++firstIndex + 2, 2));
+
+        return seconds;
     }
     public static List<int> GetAllIndicesOf(string source, string target)
     {
