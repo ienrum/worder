@@ -119,6 +119,7 @@ public class GameManager : MonoBehaviour
     {
         List<Transform> tempList = new List<Transform>(boxUIListTransform);
         tempList = updateListByValue(tempList, colorList, (tempList, colorList, i) => tempList[i].GetComponent<Image>().color = colorList[i]);
+        tempList = updateListByValue(tempList, colorList, (tempList, colorList, i) => tempList[i].GetComponent<Outline>().effectColor = ColorHelper.LerpHexColor(greenHexString,yellowHexString,0.5f));
         return tempList;
     }
     private delegate void UpdateTarget<T, V>(T target, V value);
