@@ -107,6 +107,24 @@ public static class ColorHelper
         }
         return false;
     }
+
+    public static bool isColorHexString(string input, int index)
+    {
+        while (index > 0)
+        {
+            if (input[index] == '>')
+            {
+                return false;
+            }else if (input[index] == '<')
+            {
+                return true;
+            }
+            
+            index--;
+        }
+        return true;
+    }
+
     public static List<Color> makeColorListByTargetColor(List<Color> colorList, Color target, int from, int to)
     {
         List<Color> tempColors = new List<Color>(colorList);

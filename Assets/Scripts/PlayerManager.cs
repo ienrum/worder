@@ -18,7 +18,6 @@ public class PlayerManager : MonoBehaviour
     private string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     void Start()
     {
-
     }
 
     // Update is called once per frame
@@ -34,12 +33,12 @@ public class PlayerManager : MonoBehaviour
         {
             if (playerInput.Length < MAX_WORD_SIZE)
             {
-                playerInput += getKeyToString();
+                playerInput += getKeyToString().ToLower();
             }
         }
         else if (isKeyOf(getKeyToString(), "Backspace"))
         {
-            playerInput = delLastKey(playerInput);
+            playerInput = delLastKey(playerInput).ToLower();
         }
     }
     private string delLastKey(string input)

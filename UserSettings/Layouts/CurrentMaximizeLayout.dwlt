@@ -25,7 +25,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 4059
+  controlID: 4494
 --- !u!114 &2
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -148,7 +148,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 100}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 3966
+  controlID: 4367
 --- !u!114 &4
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -662,14 +662,14 @@ MonoBehaviour:
     m_KeySerializationHelper:
     - {fileID: 386409048633383240, guid: 7a7f647657e3471418f16646a448e5af, type: 2}
     m_ValueSerializationHelper:
-    - e00: 0.85
+    - e00: 0.7119565
       e01: 0
       e02: 0
-      e03: 72.599976
+      e03: -13.478241
       e10: 0
-      e11: 0.85
+      e11: 0.7119565
       e12: 0
-      e13: 11.550041
+      e13: 38.861412
       e20: 0
       e21: 0
       e22: 1
@@ -744,7 +744,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 100}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 4011
+  controlID: 4413
 --- !u!114 &9
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -810,7 +810,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: f2d7ffff3cd9ffffeadaffff62dbffff36e5ffffaee5ffffd4f2ffff1afbffff5661000056620000c86c00004c700000587000007a7000009e700000f0700000867b0000
+      m_ExpandedIDs: f8f8ffff1afbffff6c640000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -826,7 +826,7 @@ MonoBehaviour:
         m_IsRenaming: 0
         m_OriginalEventType: 11
         m_IsRenamingFilename: 0
-        m_ClientGUIView: {fileID: 9}
+        m_ClientGUIView: {fileID: 4}
       m_SearchString: 
     m_ExpandedScenes: []
     m_CurrenRootInstanceID: 0
@@ -905,7 +905,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Scenes
+    - Assets/Scripts
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -913,7 +913,7 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Scenes
+  - Assets/Scripts
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\Users\tong0\source\repos\worder
   m_LockTracker:
@@ -975,8 +975,8 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: ba6c0000
-    m_LastClickedInstanceID: 27834
+    m_SelectedInstanceIDs: 
+    m_LastClickedInstanceID: 0
     m_HadKeyboardFocusLastEvent: 0
     m_ExpandedInstanceIDs: 
     m_RenameOverlay:
@@ -1030,7 +1030,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 100}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 4060
+  controlID: 4495
 --- !u!114 &14
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -1097,7 +1097,7 @@ MonoBehaviour:
     m_CachedPref: -160
     m_ControlHash: -371814159
     m_PrefName: Preview_InspectorPreview
-  m_LastInspectedObjectInstanceID: 27834
+  m_LastInspectedObjectInstanceID: -1
   m_LastVerticalScrollValue: 0
   m_GlobalObjectId: 
   m_InspectorMode: 0

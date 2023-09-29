@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
     string redHexString = "";
     string backHexString = "";
 
+
     private List<string> wordDictionary = new List<string>();
     string shuffledWords = "";
 
@@ -26,6 +27,8 @@ public class GameManager : MonoBehaviour
     public Transform hintUI;
     public Transform ScoreUI;
     public Transform TitleUI;
+    public Transform hintTitle;
+
 
     public Camera camera;
 
@@ -48,7 +51,10 @@ public class GameManager : MonoBehaviour
         TitleUI.GetComponent<TextMeshProUGUI>().text = ColorHelper.toColorString(TitleUI.GetComponent<TextMeshProUGUI>().text, greenHexString);
         hintUI.GetComponent<TextMeshProUGUI>().text = ColorHelper.toColorString(shuffledWords, redHexString);
 
-        wordDictionary = StringHelper.getRandomFiveWordsList();
+        List<string> targetWords = StringHelper.getRandomFiveWordsList();
+        wordDictionary = targetWords.GetRange(0, targetWords.Count-1);
+        hintTitle.GetComponent<TextMeshProUGUI>().text = ColorHelper.toColorString(targetWords[targetWords.Count - 1], ColorHelper.ColorToHex(ColorHelper.LerpHexColor(greenHexString,redHexString,0.5f)));
+
         foreach(string word in wordDictionary)
         {
             Debug.Log(word);
@@ -68,7 +74,7 @@ public class GameManager : MonoBehaviour
         boxUiList = updateBoxUIList(playerManager.PlayerInput, boxUiList);
         updateHintUI(playerManager.PlayerInput, shuffledWords, hintUI);
         timer += Time.deltaTime;
-        ScoreUI.GetComponent<TextMeshProUGUI>().text = updateScoreText(timer,greenHexString);
+        ScoreUI.GetComponent<TextMeshProUGUI>().text = updateScoreText(timer, greenHexString);
     }
     private string updateScoreText(float timer, string greenHexString)
     {
@@ -102,11 +108,12 @@ public class GameManager : MonoBehaviour
     {
         foreach (string word in wordDictionary)
         {
-            if (!input.Contains(word.ToUpper()))
+            if (!input.Contains(word))
             {
                 return false;
             }
         }
+
         return true;
     }
     private List<Transform> updateBoxUIListText(List<Transform> boxUIListTransform, string playerInput)
@@ -222,20 +229,27 @@ public class GameManager : MonoBehaviour
     {
         string tempWords = shuffledWords;
         string tempInput = input;
+        int i = 0;
 
-        for (int i = 0; i < tempInput.Length; i++)
+        while (tempInput.Length > i)
         {
-            int index = findIndexOfStringByFiltering(tempWords, tempInput[i].ToString(), ColorHelper.isColorString);
-            if (index != -1 && !ColorHelper.isColorString(tempWords, index, greenHexString))
+            int index = findIndexOfStringByFiltering(tempWords, tempInput[i].ToString(), isAbleToColored);
+            if (index != -1 && isAbleToColored(tempWords, index, greenHexString))
             {
                 string colorString = ColorHelper.toColorString(tempWords[index].ToString(), greenHexString);
 
                 tempWords = tempWords.Remove(index, 1);
                 tempWords = tempWords.Insert(index, colorString);
             }
+            i++;
         }
 
         return tempWords;
+    }
+
+    private bool isAbleToColored(string tempWords, int index,string hexString)
+    {
+        return !ColorHelper.isColorString(tempWords, index, hexString) && !ColorHelper.isColorHexString(tempWords, index);
     }
 
     private int letterOverlapLength(string word,string input,int startIndex)
@@ -263,11 +277,11 @@ public class GameManager : MonoBehaviour
         int index = 0;
         while ((index = text.IndexOf(searchTerm, index)) != -1)
         {
-            if (filterFunc(text, index,greenHexString))
+            if (!filterFunc(text, index,greenHexString))
             {
                 index += searchTerm.Length;
             }
-            else if (!filterFunc(text, index, greenHexString))
+            else if (filterFunc(text, index, greenHexString))
             {
                 return index;
             }
