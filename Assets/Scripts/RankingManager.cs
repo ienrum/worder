@@ -33,8 +33,12 @@ public class RankingManager : MonoBehaviour
     {
         string playerName = inputField.GetChild(0).GetChild(2).GetComponent<TextMeshProUGUI>().text;
         string scoreText = scoreField.GetComponent<TextMeshProUGUI>().text;
-
-        if (playerScoreDict.ContainsKey(playerName))
+        if (String.IsNullOrEmpty(playerName) || isZeroWidthSpace(playerName))
+        {
+            errorMessageUI.GetComponent<TextMeshProUGUI>().text = "Name is empty";
+            StartCoroutine(ErrorMessageCoroutine(errorMessageUI));
+        }
+        else if (playerScoreDict.ContainsKey(playerName))
         {
             errorMessageUI.GetComponent<TextMeshProUGUI>().text = "Name is duplicated";
             StartCoroutine(ErrorMessageCoroutine(errorMessageUI));
@@ -48,6 +52,15 @@ public class RankingManager : MonoBehaviour
             MakeScoreFieldList(playerScoreDict, playerNameUI, contentFieldPos);
             updateUIs();
         }
+    }
+
+    private bool isZeroWidthSpace(string text)
+    {
+        if (text.Length != 1)
+        {
+            return false;
+        }
+        return Convert.ToInt32(char.Parse(text)) == (char)8203;
     }
 
     private void updateUIs()
