@@ -10,6 +10,9 @@ public class PlayerManager : MonoBehaviour
     public string answerWord = "";
     private string playerInput = "";
 
+    public Transform typingSound;
+    public Transform removeSound;
+
     public string PlayerInput
     {
         get { return playerInput; }
@@ -33,11 +36,13 @@ public class PlayerManager : MonoBehaviour
         {
             if (playerInput.Length < MAX_WORD_SIZE)
             {
+                typingSound.GetComponent<AudioSource>().Play();
                 playerInput += getKeyToString().ToLower();
             }
         }
         else if (isKeyOf(getKeyToString(), "Backspace"))
         {
+            removeSound.GetComponent<AudioSource>().Play();
             playerInput = delLastKey(playerInput).ToLower();
         }
     }

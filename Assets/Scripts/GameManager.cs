@@ -28,6 +28,8 @@ public class GameManager : MonoBehaviour
     public Transform TitleUI;
     public Transform hintTitle;
 
+    public Transform failedSound;
+    public Transform successSound;
 
     public Camera camera;
 
@@ -70,6 +72,7 @@ public class GameManager : MonoBehaviour
         {
             QuitGame(timer);
         }
+        updateSound(failedSound, successSound, boxUiList, playerManager.PlayerInput);
         boxUiList = updateBoxUIList(playerManager.PlayerInput, boxUiList);
         updateHintUI(playerManager.PlayerInput, shuffledWords, hintUI);
         timer += Time.deltaTime;
@@ -196,7 +199,50 @@ public class GameManager : MonoBehaviour
         }
         return tempPlayerInput.Substring(wordFirstIndex, correctWord.Length) == correctWord && tempPlayerInput.IndexOf(correctWord) != wordFirstIndex;
     }
+    private bool updateSound(Transform failedSound,Transform successSound, List<Transform> boxUIListTransform,string playerInput)
+    {
+        int n = playerInput.Length - 1;
+        if (boxUIListTransform == null || n <0)
+        {
+            Debug.Log("ok2");
+            return false;
+        }
+        else
+        {
+            if (isCorrectForCompeteWord(boxUIListTransform[n]))
+            {
+                Debug.Log("ok");
+                successSound.GetComponent<AudioSource>().Play();
+            }else if (isNotCorrectForCompeteWord(boxUIListTransform[n]))
+            {
+                failedSound.GetComponent<AudioSource>().Play();
+            }
+        }
+        return true;
+    }
+    private bool isCorrectForCompeteWord(Transform boxUITransform) {
+        Debug.Log(boxUITransform.GetComponent<Image>().color);
+        if (boxUITransform.GetComponent<Image>().color == ColorHelper.HexToColor(greenHexString))
+        {
+            return true;
+        }
+        else 
+        {
+            return false;
+        }
+    }
 
+    private bool isNotCorrectForCompeteWord(Transform boxUITransform)
+    {
+        if (boxUITransform.GetComponent<Image>().color == ColorHelper.HexToColor(redHexString))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     private List<int> GetCorrectFirstLetterIndicesOfPlayerInput(string playerInput, string correctWord)
     {
         string firstLetterOfWord = correctWord[0].ToString();
