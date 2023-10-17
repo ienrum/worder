@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.SocialPlatforms.Impl;
 using System.Threading;
+using Unity.VisualScripting;
 
 public class GameManager : MonoBehaviour
 {
@@ -199,29 +200,25 @@ public class GameManager : MonoBehaviour
         }
         return tempPlayerInput.Substring(wordFirstIndex, correctWord.Length) == correctWord && tempPlayerInput.IndexOf(correctWord) != wordFirstIndex;
     }
-    private bool updateSound(Transform failedSound,Transform successSound, List<Transform> boxUIListTransform,string playerInput)
+    private void updateSound(Transform failedSound,Transform successSound, List<Transform> boxUIListTransform,string playerInput)
     {
         int n = playerInput.Length - 1;
-        if (boxUIListTransform == null || n <0)
+
+        if (!(boxUIListTransform == null || n < 0) && isCorrectForCompeteWord(boxUIListTransform[n]) && !playerManager.isBackSpace)
         {
-            Debug.Log("ok2");
-            return false;
+            successSound.gameObject.SetActive(true);
         }
-        else
+        else if (!(boxUIListTransform == null || n < 0) &&isNotCorrectForCompeteWord(boxUIListTransform[n]) && !playerManager.isBackSpace)
         {
-            if (isCorrectForCompeteWord(boxUIListTransform[n]))
-            {
-                Debug.Log("ok");
-                successSound.GetComponent<AudioSource>().Play();
-            }else if (isNotCorrectForCompeteWord(boxUIListTransform[n]))
-            {
-                failedSound.GetComponent<AudioSource>().Play();
-            }
+            failedSound.gameObject.SetActive(true);
         }
-        return true;
+        else if (!(boxUIListTransform == null || n < 0))
+        {
+            successSound.gameObject.SetActive(false);
+            failedSound.gameObject.SetActive(false);
+        }
     }
     private bool isCorrectForCompeteWord(Transform boxUITransform) {
-        Debug.Log(boxUITransform.GetComponent<Image>().color);
         if (boxUITransform.GetComponent<Image>().color == ColorHelper.HexToColor(greenHexString))
         {
             return true;
