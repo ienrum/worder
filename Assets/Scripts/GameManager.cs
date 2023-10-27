@@ -57,10 +57,10 @@ public class GameManager : MonoBehaviour
         wordDictionary = targetWords.GetRange(0, targetWords.Count-1);
         hintTitle.GetComponent<TextMeshProUGUI>().text = ColorHelper.toColorString(targetWords[targetWords.Count - 1], ColorHelper.ColorToHex(ColorHelper.LerpHexColor(greenHexString,redHexString,0.5f)));
 
-        foreach(string word in wordDictionary)
-        {
-            Debug.Log(word);
-        }
+        //foreach(string word in wordDictionary)
+        //{
+        //    Debug.Log(word);
+        //}
         shuffledWords = StringHelper.GetShuffledLetters(wordDictionary);
 
         playerManager = FindAnyObjectByType<PlayerManager>();
