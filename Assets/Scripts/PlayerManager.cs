@@ -9,6 +9,10 @@ public class PlayerManager : MonoBehaviour
     const int MAX_WORD_SIZE = 25;
     public string answerWord = "";
     private string playerInput = "";
+    public bool isBackSpace = false;
+
+    public Transform typingSound;
+    public Transform removeSound;
 
     public string PlayerInput
     {
@@ -18,7 +22,6 @@ public class PlayerManager : MonoBehaviour
     private string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     void Start()
     {
-
     }
 
     // Update is called once per frame
@@ -28,18 +31,22 @@ public class PlayerManager : MonoBehaviour
         {
             answerWord = playerInput;
             playerInput = "";
-            Debug.Log(answerWord);
+            isBackSpace = false;
         }
         else if (isKeyInAlphabet(getKeyToString()))
         {
             if (playerInput.Length < MAX_WORD_SIZE)
             {
-                playerInput += getKeyToString();
+                typingSound.GetComponent<AudioSource>().Play();
+                playerInput += getKeyToString().ToLower();
+                isBackSpace = false;
             }
         }
         else if (isKeyOf(getKeyToString(), "Backspace"))
         {
-            playerInput = delLastKey(playerInput);
+            isBackSpace = true;
+            removeSound.GetComponent<AudioSource>().Play();
+            playerInput = delLastKey(playerInput).ToLower();
         }
     }
     private string delLastKey(string input)

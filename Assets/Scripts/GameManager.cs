@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using TMPro;
 using System.Reflection;
-using UnityEditor.Search;
 using UnityEngine.UI;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.SocialPlatforms.Impl;
 using System.Threading;
+using Unity.VisualScripting;
 
 public class GameManager : MonoBehaviour
 {
@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
     string redHexString = "";
     string backHexString = "";
 
+
     private List<string> wordDictionary = new List<string>();
     string shuffledWords = "";
 
@@ -26,6 +27,10 @@ public class GameManager : MonoBehaviour
     public Transform hintUI;
     public Transform ScoreUI;
     public Transform TitleUI;
+    public Transform hintTitle;
+
+    public Transform failedSound;
+    public Transform successSound;
 
     public Camera camera;
 
@@ -48,7 +53,10 @@ public class GameManager : MonoBehaviour
         TitleUI.GetComponent<TextMeshProUGUI>().text = ColorHelper.toColorString(TitleUI.GetComponent<TextMeshProUGUI>().text, greenHexString);
         hintUI.GetComponent<TextMeshProUGUI>().text = ColorHelper.toColorString(shuffledWords, redHexString);
 
-        wordDictionary = StringHelper.getRandomFiveWordsList();
+        List<string> targetWords = StringHelper.getRandomFiveWordsList();
+        wordDictionary = targetWords.GetRange(0, targetWords.Count-1);
+        hintTitle.GetComponent<TextMeshProUGUI>().text = ColorHelper.toColorString(targetWords[targetWords.Count - 1], ColorHelper.ColorToHex(ColorHelper.LerpHexColor(greenHexString,redHexString,0.5f)));
+
         foreach(string word in wordDictionary)
         {
             Debug.Log(word);
@@ -65,10 +73,11 @@ public class GameManager : MonoBehaviour
         {
             QuitGame(timer);
         }
+        updateSound(failedSound, successSound, boxUiList, playerManager.PlayerInput);
         boxUiList = updateBoxUIList(playerManager.PlayerInput, boxUiList);
         updateHintUI(playerManager.PlayerInput, shuffledWords, hintUI);
         timer += Time.deltaTime;
-        ScoreUI.GetComponent<TextMeshProUGUI>().text = updateScoreText(timer,greenHexString);
+        ScoreUI.GetComponent<TextMeshProUGUI>().text = updateScoreText(timer, greenHexString);
     }
     private string updateScoreText(float timer, string greenHexString)
     {
@@ -102,11 +111,12 @@ public class GameManager : MonoBehaviour
     {
         foreach (string word in wordDictionary)
         {
-            if (!input.Contains(word.ToUpper()))
+            if (!input.Contains(word))
             {
                 return false;
             }
         }
+
         return true;
     }
     private List<Transform> updateBoxUIListText(List<Transform> boxUIListTransform, string playerInput)
@@ -119,6 +129,7 @@ public class GameManager : MonoBehaviour
     {
         List<Transform> tempList = new List<Transform>(boxUIListTransform);
         tempList = updateListByValue(tempList, colorList, (tempList, colorList, i) => tempList[i].GetComponent<Image>().color = colorList[i]);
+        tempList = updateListByValue(tempList, colorList, (tempList, colorList, i) => tempList[i].GetComponent<Outline>().effectColor = ColorHelper.LerpHexColor(greenHexString,yellowHexString,0.5f));
         return tempList;
     }
     private delegate void UpdateTarget<T, V>(T target, V value);
@@ -189,7 +200,46 @@ public class GameManager : MonoBehaviour
         }
         return tempPlayerInput.Substring(wordFirstIndex, correctWord.Length) == correctWord && tempPlayerInput.IndexOf(correctWord) != wordFirstIndex;
     }
+    private void updateSound(Transform failedSound,Transform successSound, List<Transform> boxUIListTransform,string playerInput)
+    {
+        int n = playerInput.Length - 1;
 
+        if (!(boxUIListTransform == null || n < 0) && isCorrectForCompeteWord(boxUIListTransform[n]) && !playerManager.isBackSpace)
+        {
+            successSound.gameObject.SetActive(true);
+        }
+        else if (!(boxUIListTransform == null || n < 0) &&isNotCorrectForCompeteWord(boxUIListTransform[n]) && !playerManager.isBackSpace)
+        {
+            failedSound.gameObject.SetActive(true);
+        }
+        else if (!(boxUIListTransform == null || n < 0))
+        {
+            successSound.gameObject.SetActive(false);
+            failedSound.gameObject.SetActive(false);
+        }
+    }
+    private bool isCorrectForCompeteWord(Transform boxUITransform) {
+        if (boxUITransform.GetComponent<Image>().color == ColorHelper.HexToColor(greenHexString))
+        {
+            return true;
+        }
+        else 
+        {
+            return false;
+        }
+    }
+
+    private bool isNotCorrectForCompeteWord(Transform boxUITransform)
+    {
+        if (boxUITransform.GetComponent<Image>().color == ColorHelper.HexToColor(redHexString))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     private List<int> GetCorrectFirstLetterIndicesOfPlayerInput(string playerInput, string correctWord)
     {
         string firstLetterOfWord = correctWord[0].ToString();
@@ -221,20 +271,27 @@ public class GameManager : MonoBehaviour
     {
         string tempWords = shuffledWords;
         string tempInput = input;
+        int i = 0;
 
-        for (int i = 0; i < tempInput.Length; i++)
+        while (tempInput.Length > i)
         {
-            int index = findIndexOfStringByFiltering(tempWords, tempInput[i].ToString(), ColorHelper.isColorString);
-            if (index != -1 && !ColorHelper.isColorString(tempWords, index, greenHexString))
+            int index = findIndexOfStringByFiltering(tempWords, tempInput[i].ToString(), isAbleToColored);
+            if (index != -1 && isAbleToColored(tempWords, index, greenHexString))
             {
                 string colorString = ColorHelper.toColorString(tempWords[index].ToString(), greenHexString);
 
                 tempWords = tempWords.Remove(index, 1);
                 tempWords = tempWords.Insert(index, colorString);
             }
+            i++;
         }
 
         return tempWords;
+    }
+
+    private bool isAbleToColored(string tempWords, int index,string hexString)
+    {
+        return !ColorHelper.isColorString(tempWords, index, hexString) && !ColorHelper.isColorHexString(tempWords, index);
     }
 
     private int letterOverlapLength(string word,string input,int startIndex)
@@ -262,11 +319,11 @@ public class GameManager : MonoBehaviour
         int index = 0;
         while ((index = text.IndexOf(searchTerm, index)) != -1)
         {
-            if (filterFunc(text, index,greenHexString))
+            if (!filterFunc(text, index,greenHexString))
             {
                 index += searchTerm.Length;
             }
-            else if (!filterFunc(text, index, greenHexString))
+            else if (filterFunc(text, index, greenHexString))
             {
                 return index;
             }

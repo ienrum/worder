@@ -200,6 +200,32 @@ public static class StringHelper
         "cloud",
         "crazy"
     };
+    static List<List<string>> categorizedFiveLetterWords = new List<List<string>>
+    {
+        new List<string> { "table", "chair", "floor", "place", "store", "furniture" },
+        new List<string> { "shirt", "glass", "voice", "music", "think", "clothing" },
+        new List<string> { "apple", "sugar", "lunch", "fresh", "taste", "kitchen" },
+        new List<string> { "water", "plant", "sound", "clear", "grass", "nature" },
+        new List<string> { "bread", "heavy", "sleep", "spoon", "knife", "food" },
+        new List<string> { "brush", "green", "paint", "young", "print", "art" },
+        new List<string> { "speak", "quick", "radio", "white", "phone", "communication" },
+        new List<string> { "train", "dance", "photo", "light", "carry", "activities" },
+        new List<string> { "brick", "wheel", "books", "phone", "chair", "storage" },
+        new List<string> { "money", "happy", "break", "spend", "banks", "finance" },
+        new List<string> { "north", "photo", "movie", "japan", "house", "locations" },
+        new List<string> { "sleep", "child", "stars", "dream", "music", "nighttime" },
+        new List<string> { "tiger", "whale", "beaks", "goose", "horse", "animals" },
+        new List<string> { "beach", "waves", "ocean", "sandy", "shell", "seaside" },
+        new List<string> { "happy", "smile", "laugh", "cheer", "angry", "emotions" },
+        new List<string> { "globe", "earth", "world", "water", "solar", "planets" },
+        new List<string> { "river", "flows", "water", "ocean", "plant", "nature" },
+        new List<string> { "robot", "metal", "phone", "datas", "gears", "technology" },
+        new List<string> { "apple", "juicy", "sweet", "fresh", "fruit", "fruits" },
+        new List<string> { "books", "pages", "glass", "novel", "write", "literature" },
+        new List<string> { "green", "trees", "grass", "plant", "water", "nature" },
+        new List<string> { "japan", "china", "seoul", "korea", "asian", "countries" },
+    };
+
     public static string GetShuffledLetters(List<string> wordDictionary)
     {
         string result = "";
@@ -209,29 +235,26 @@ public static class StringHelper
     }
     public static List<string> getRandomFiveWordsList(bool isHard = false)
     {
-        List<string> targetList;
-        string prevString = "";
-        if (isHard)
+        List<List<string>> targetList;
+        targetList = categorizedFiveLetterWords;
+        
+        int n = targetList.Count;
+        int index = Random.Range(0, n);
+        return (targetList[index]);
+    }
+    static string ReplaceCharAtIndexWithUpperCase(string input, int targetIndex)
+    {
+        if (targetIndex >= 0 && targetIndex < input.Length)
         {
-            targetList = fiveLetterWords;
+            char[] charArray = input.ToCharArray();
+            charArray[targetIndex] = char.ToUpper(charArray[targetIndex]);
+            return new string(charArray);
         }
         else
         {
-            targetList = easeFiveLetterWords;
+            // 인덱스가 유효하지 않을 경우 입력 문자열을 그대로 반환
+            return input;
         }
-        int n = targetList.Count;
-        List<string> result = new List<string>();
-        for (int i = 0; i < 5; i++)
-        {
-            int index = Random.Range(0, n);
-            while (letterOverlapCount(targetList[index], prevString) <= 3 || isOverlapWordInList(result, prevString))
-            {
-                index = Random.Range(0, n);
-                prevString = targetList[index];
-            }
-            result.Add(targetList[index]);
-        }
-        return StringListToUpper(result);
     }
 
     static int letterOverlapCount(string a, string b)
@@ -292,7 +315,7 @@ public static class StringHelper
         chars = StringHelper.stringToCharList(string.Join("", wordDictionary));
 
         List<char> shuffledCharList = ShuffleList(chars, 100);
-        return StringHelper.charListToString(shuffledCharList).ToUpper();
+        return StringHelper.charListToString(shuffledCharList);
     }
     public static List<string> StringListToUpper(List<string> list)
     {
