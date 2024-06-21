@@ -1,6 +1,9 @@
 # Worder
 [배포 링크](https://worder-seven.vercel.app)
 
+## 프로그램 다이어그램
+![image](https://github.com/ienrum/worder/assets/137467530/175961e1-3ae4-4daa-bfe9-f811f243f938)
+
 ## Wordle 오마주 게임 Worder 
 
 학교 프로젝트 과제로 Wordle(단어 퍼즐 게임)을 오마주한 새로운 규칙의 단어 퍼즐 게임을 제작하였습니다.
